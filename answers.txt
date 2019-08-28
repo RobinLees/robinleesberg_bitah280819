@@ -1,0 +1,77 @@
+The answers of the exam of bit05 can be written in this document.
+
+# Question 2 2.5 pts
+
+A doctor's office keeps track of the following data.
+
+    PatientNumber
+    PatientName
+    Birthdate
+    PrescriptionNumber
+    Medicine
+    Dosage
+    DoctorNumber
+    Doctor
+    Assistant
+
+Normalise this data up to 3NF.
+Save the results of each normalisation step, together with a description of the steps you took in a document with a clear name. Add this document to your git-repository and choose a suiting commit-message.
+
+
+UF =Doctorsoffice (PatientNumber, PatientName, Birthdate, PrescriptionNumber, Medicine, Dosage, DoctorNumber, Doctor, Assistant)
+
+1NF=create seperat medicine relationDoctorsoffice (PatientNumber, PatientName, Birthdate, DoctorNumber, Doctor, Assistant)Medicine (Medicine, PrescriptionNumber, Dosage,)
+
+2NF=add doctors data to medicine relation
+
+
+ Question 3 12.5 pts
+
+Create a relational database able to contain following data:
+
+    Patient
+        Name, sex, age_diagnose
+    Mutation
+        Chromosomal location
+    Gene
+        Name, location, description
+
+Create your database model in MySQL Workbench. Save both your model and the SQL code that is generated in the forward engineering. Add both files to your repository with an appropriate commit message.
+
+-- MySQL Workbench Forward EngineeringSET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';-- ------------------------------------------------------- Schema mydb-- ------------------------------------------------------- ------------------------------------------------------- Schema mydb-- -----------------------------------------------------CREATE SCHEMA IF NOT EXISTS `mydb` DEFAULT CHARACTER SET utf8 ;USE `mydb` ;-- ------------------------------------------------------- Table `mydb`.`Mutation`-- -----------------------------------------------------CREATE TABLE IF NOT EXISTS `mydb`.`Mutation` (`mutation_id` INT NOT NULL,`chromosomal_location` VARCHAR(45) NULL,`Gene_id` INT NULL,PRIMARY KEY (`mutation_id`))ENGINE = InnoDB;-- ------------------------------------------------------- Table `mydb`.`Patient`-- -----------------------------------------------------CREATE TABLE IF NOT EXISTS `mydb`.`Patient` (`idPatient` INT NOT NULL COMMENT '\n Patient\n Name, sex, age_diagnose\n Mutation\n Chromosomal location\n Gene\n Name, location, description\n',`patient_name` VARCHAR(45) NULL,`patient_sex` ENUM('f', 'm') NULL,`patient_age_diagnose` VARCHAR(3) NULL COMMENT '\n Patient\n Name, sex, age_diagnose\n Mutation\n Chromosomal location\n Gene\n Name, location, description\n',`mutation_id` INT NULL,PRIMARY KEY (`idPatient`),INDEX `fk_mutation_id_idx` (`mutation_id` ASC) VISIBLE,CONSTRAINT `fk_mutation_id`FOREIGN KEY (`mutation_id`)REFERENCES `mydb`.`Mutation` (`mutation_id`)ON DELETE NO ACTIONON UPDATE NO ACTION)ENGINE = InnoDB;-- ------------------------------------------------------- Table `mydb`.`Gene`-- -----------------------------------------------------CREATE TABLE IF NOT EXISTS `mydb`.`Gene` (`Gene_id` INT NOT NULL,`Gene_name` VARCHAR(45) NULL,`Gene_location` VARCHAR(45) NULL,`Gene_description` TEXT(200) NULL,PRIMARY KEY (`Gene_id`),CONSTRAINT `fk_Gene_id`FOREIGN KEY (`Gene_id`)REFERENCES `mydb`.`Mutation` (`mutation_id`)ON DELETE NO ACTIONON UPDATE NO ACTION)ENGINE = InnoDBCOMMENT = '\n Patient\n Name, sex, age_diagnose\n Mutation\n Chromosomal location\n Gene\n Name, location, description\n';SET SQL_MODE=@OLD_SQL_MODE;SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+# Question 4 3 pts
+
+Give the name and length of the third largest gene in the genome.
+
+Name: 'PARP1',Length: '2493040'
+( Query: SELECT gene.gene_name, (seq_region_end - seq_region_start + 1) AS length FROM gene ORDER BY length DESC LIMIT 3; )
+
+# Question 5 3.5 pts
+
+Give the name of the chromosome with the most genes that tell something about  breast cancer. What is the number of transcripts of this chromosome? (2 queries)
+
+1. This is chromosome  '16',  met  '2' genes that tell something about breast cancer. 
+(Query: SELECT chromosome, COUNT(*) AS number_genes FROM bioinf_examen.gene WHERE description LIKE "%breast cancer%" GROUP BY chromosome ORDER BY number_genes DESC LIMIT 1; )
+
+2.  The number of transcripts on chromosome '16' is '31052'.
+(Query:SELECT chromosome, COUNT(*) AS total_transcripts FROM bioinf_examen.gene JOIN transcript ON transcript.gene_id = gene.gene_id JOIN exon_transcript ON exon_transcript.transcript_id = transcript.transcript_id WHERE gene.chromosome = 16 GROUP BY chromosome ORDER BY total_transcripts;)
+
+# Question 6 3 pts
+
+Give the number of medicines taken with a nose spray (SPRAY;NASAL). Make sure that your query only shows the name of the drug.
+
+The number is 22.
+Query to count: db.examen.count({"method_of_admission":["SPRAY;NASAL"]},{"drug" : 1, "_id" : 0}); OR
+db.examen.find({"method_of_admission":["SPRAY;NASAL"]},{"drug" : 1, "_id" : 0}).count();
+
+Query for the list:db.examen.find({"method_of_admission":["SPRAY;NASAL"]},{"drug" : 1, "_id" : 0});
+
+# Question 7 3.5 pts
+
+Give the names of the companies that produce medicines that on average  cause side effects in more than 10% of cases? Sort your results according to decreasing percentage of side effects.
+
+db.examen.find({"percentage_of_side_effects" : {$gt : 10}},{"company" : 1, "_id" : 0}).sort({"percentage_of_side_effect":-1});
+
+
+
